@@ -41,10 +41,7 @@ You have to associate each comment with a specific language. To do this, go to t
 == Screenshots ==
 
 1. Here you can see the different comments for the different translations of the "Hello World!" post.
-2. Here you can see different aspects of the back-end integration.
-	1. This is the dropdown with available languages and the "Bulk Set Language" button.
-	1. This is the confirmation message that appears after a successfull modification of the language.
-	1. This is the notification message when a comment's language has either not been set-up or that language is currently disabled.
+2. Here you can see different aspects of the back-end integration. | (1) This is the dropdown with available languages and the "Bulk Set Language" button. (2) This is the confirmation message that appears after a successfull modification of the language. (3) This is the notification message when a comment's language has either not been set-up or that language is currently disabled.
 
 == Changelog ==
 
