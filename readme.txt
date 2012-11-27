@@ -1,4 +1,5 @@
 === qTranslate Separate Comments ===
+Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=S8FGREYJJA4FE
 Contributors: nikolov.tmw
 Tags: qTranslate, comments, comment languages
 Requires at least: 3.3.2
@@ -38,12 +39,27 @@ The plugin also fixes an issue of qTranslate. The issue consists in the fact tha
 
 You have to associate each comment with a specific language. To do this, go to the Comments section in WordPress Dashboard and set the appropriate language for all of your comments(you can use the "Bulk Set Language" button after selecting some comments and the right language for them).
 
+= The plugin doesn't redirect to the proper language and the language is set incorrectly =
+
+In order to properly identify where the comment is coming from, this plugin adds a hidden input to the Comments form. This is done by hooking a function to the `comment_form` action hook, which is called from the `comment_form()` WordPress function. If you are using a custom comments form instead of calling this function, make sure to add `<?php do_action( 'comment_form', $post->ID ); ?>` . If this still doesn't work, replace that code with the following: `<?php global $post; do_action( 'comment_form', $post->ID ); ?>`.
+
 == Screenshots ==
 
 1. Here you can see the different comments for the different translations of the "Hello World!" post.
-2. Here you can see different aspects of the back-end integration. | (1) This is the dropdown with available languages and the "Bulk Set Language" button. (2) This is the confirmation message that appears after a successfull modification of the language. (3) This is the notification message when a comment's language has either not been set-up or that language is currently disabled.
+2. Here you can see different aspects of the back-end integration.
+	1. This is the dropdown with available languages and the "Bulk Set Language" button.
+	1. This is the confirmation message that appears after a successfull modification of the language.
+	1. This is the notification message when a comment's language has either not been set-up or that language is currently disabled.
 
 == Changelog ==
+
+= 1.1 =
+* Fixed the `fix_comments_count()` function(a typo was returning the wrong comments count) - thanks @hyOzd
+* Added support for qTranslate's "Query Mode"
+* Fixed a couple of little bugs
+* Updated the FAQ section
+* Added a .pot file
+* Added Bulgarian translation
 
 = 1.0 =
 * Initial release.

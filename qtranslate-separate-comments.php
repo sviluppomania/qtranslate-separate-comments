@@ -2,7 +2,7 @@
 /*
 Plugin Name: qTranslate Separate Comments
 Description: This plugin separates the user comments by the language they viewed the article in - this way you avoid duplicate content and comments in other languages than the one the current visitor is using. You can manually change the language of each comment(and you will have to set it in the begining).
-Version: 1.0
+Version: 1.1
 Author: Nikola Nikolov(TheMoonWatch)
 Author URI: http://themoonwatch.com/
 License: GPLv2 or later
@@ -96,7 +96,7 @@ class qTranslate_Separate_Comments {
 	**/
 	public static function comment_language_metabox($comment) {
 		global $q_config;
-		// var_dump($q_config);
+
 		$curr_lang = get_comment_meta($comment->comment_ID, '_comment_language', true);
 		?>
 		<table class="form-table editcomment comment_xtra">
@@ -120,7 +120,7 @@ class qTranslate_Separate_Comments {
 		if ( $count != 0 ) {
 			global $q_config;
 			$comments_query = new qTC_Comment_Query();
-			$comments = $comments_query->query( array('post_id' => $post->ID, 'status' => 'approve', 'order' => 'ASC', 'meta_query' => array(array('key' => '_comment_language', 'value' => $q_config['language']))) );
+			$comments = $comments_query->query( array('post_id' => $post_id, 'status' => 'approve', 'order' => 'ASC', 'meta_query' => array(array('key' => '_comment_language', 'value' => $q_config['language']))) );
 
 			return count($comments);
 		}
@@ -303,14 +303,48 @@ class qTranslate_Separate_Comments {
 	* @access public
 	**/
 	public static function new_comment($commentID) {
-		$prev_url = $_POST['qtc_comment_from'];
 		global $q_config;
-		if ( $prev_url ) {
-			$q_config['url_info'] = qtrans_extractURL($prev_url, $_SERVER["HTTP_HOST"], isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '');
-			$q_config['language'] = $q_config['url_info']['language'];
+
+		if ( isset( $q_config ) ) {
+			$prev_url = $_POST['qtc_comment_from'];
+			if ( $prev_url ) {
+				// Fix for ?lang=xx , since qTranslate doesn't parse the URL for query arguments - instead it checks the $_GET['lang'] variable
+				$get_lang = preg_match( '~lang=[a-z]{2}~', $prev_url ) ? preg_replace( '~.*lang=([a-z]{2}).*?~', '\1', $prev_url ) : false;
+
+				$q_config['url_info'] = qtrans_extractURL($prev_url, $_SERVER["HTTP_HOST"], isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '');
+
+				$q_config['language'] = $get_lang && qtrans_isEnabled( $get_lang ) ? $get_lang : $q_config['url_info']['language'];
+
+				$q_config['url_info']['original_url'] = untrailingslashit( remove_query_arg( 'lang', $q_config['url_info']['original_url'] ) );
+				$q_config['url_info']['url'] = untrailingslashit( remove_query_arg( 'lang', $q_config['url_info']['url'] ) );
+			}
+			$comm_lang = $q_config['language'];
+			update_comment_meta($commentID, '_comment_language', $comm_lang);
+
+			add_filter( 'comment_post_redirect', array( 'qTranslate_Separate_Comments', 'fix_comment_post_redirect' ), 10, 2 );
 		}
-		$comm_lang = $q_config['language'];
-		update_comment_meta($commentID, '_comment_language', $comm_lang);
+	}
+
+	/**
+	* Fixes the "&amp;" in URL's parsed by qTranslate
+	* Generally that's a good practice, but not and when you do a PHP redirect
+	*
+	* @access public
+	**/
+	public static function fix_comment_post_redirect( $location, $comment ) {
+		$location = str_replace( '&amp;', '&', $location );
+		if ( preg_match( '~lang=([a-z]{2}).*?lang=([a-z]{2})~', $location ) ) {
+			global $q_config;
+			$location = preg_replace( '~#comment-\d*~', '', $location );
+			
+			$location = remove_query_arg( 'lang', $location );
+			if ( $q_config['language'] != $q_config['default_language'] || ! $q_config['hide_default_language'] ) {
+				$location = add_query_arg( 'lang', $q_config['language'], $location );
+			}
+			$location .= '#comment-' . $comment->comment_ID;
+		}
+
+		return $location;
 	}
 
 	/**
@@ -321,10 +355,37 @@ class qTranslate_Separate_Comments {
 	* @access public
 	**/
 	public static function comment_form_hook($post_id) {
-		$permalink = get_permalink($post_id);
-		$host = $_SERVER['HTTP_HOST'];
-		$request_uri = preg_replace("~^.*?{$host}~i", '', $permalink);
-		echo '<input type="hidden" name="qtc_comment_from" value="' . $request_uri . '" />';
+		global $q_config;
+		$url = self::curPageURL();
+		$url = ! in_array( $q_config['url_mode'], array( QT_URL_PATH, QT_URL_DOMAIN ) ) && ! preg_match( '~lang=[a-z]{2}~', $prev_url ) ? add_query_arg( 'lang', $q_config['language'], $url ) : $url;
+		echo '<input type="hidden" name="qtc_comment_from" value="' . esc_attr( $url ) . '" />';
+	}
+
+	/**
+	* Returns the current page URL, including any query arguments
+	* Skips the http://host/ part by default
+	*
+	* @param boolean $exclude_host - Whether to exclude the "http://host/" part. Defaults to true
+	*
+	* @access public
+	**/
+	public static function curPageURL( $exclude_host = true ) {
+		$pageURL = '';
+		if ( ! $exclude_host ) {
+			$pageURL = 'http';
+			if ($_SERVER["HTTPS"] == "on") {
+				$pageURL .= "s";
+			}
+			$pageURL .= "://";
+			if ($_SERVER["SERVER_PORT"] != "80") {
+				$pageURL .= $_SERVER["SERVER_NAME"] . ":" . $_SERVER["SERVER_PORT"];
+			} else {
+				$pageURL .= $_SERVER["SERVER_NAME"];
+			}
+		}
+		$pageURL .= $_SERVER["REQUEST_URI"];
+
+		return $pageURL;
 	}
 
 	/**
@@ -335,9 +396,43 @@ class qTranslate_Separate_Comments {
 	* @access public
 	**/
 	public static function filter_comments_by_lang($comments, $post_id) {
-		global $q_config;
-		$comments_query = new qTC_Comment_Query();
-		$comments = $comments_query->query( array('post_id' => $post_id, 'status' => 'approve', 'order' => 'ASC', 'meta_query' => array(array('key' => '_comment_language', 'value' => $q_config['language']))) );
+		global $q_config, $wp_query, $withcomments, $post, $wpdb, $id, $comment, $user_login, $user_ID, $user_identity, $overridden_cpage;
+
+		// Store the Meta Query arguments
+		$meta_query = array( array( 'key' => '_comment_language', 'value' => $q_config['language'] ) );
+
+		/**
+		 * Comment author information fetched from the comment cookies.
+		 *
+		 * @uses wp_get_current_commenter()
+		 */
+		$commenter = wp_get_current_commenter();
+
+		/**
+		 * The name of the current comment author escaped for use in attributes.
+		 */
+		$comment_author = $commenter['comment_author']; // Escaped by sanitize_comment_cookies()
+
+		/**
+		 * The email address of the current comment author escaped for use in attributes.
+		 */
+		$comment_author_email = $commenter['comment_author_email'];  // Escaped by sanitize_comment_cookies()
+
+		// WordPress core files use custom SQL for most of it's stuff, we're only using the $comments_query object to get the most simple query
+		if ( $user_ID ) {
+			// Build the Meta Query SQL
+			$mq_sql = get_meta_sql( $meta_query, 'comment', $wpdb->comments, 'comment_ID' );
+
+			$comments = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $wpdb->comments {$mq_sql['join']} WHERE comment_post_ID = %d AND (comment_approved = '1' OR ( user_id = %d AND comment_approved = '0' ) ) {$mq_sql['where']} ORDER BY comment_date_gmt", $post->ID, $user_ID ) );
+		} else if ( empty( $comment_author ) ) {
+			$comments_query = new qTC_Comment_Query();
+			$comments = $comments_query->query( array('post_id' => $post_id, 'status' => 'approve', 'order' => 'ASC', 'meta_query' => $meta_query ) );
+		} else {
+			// Build the Meta Query SQL
+			$mq_sql = get_meta_sql( $meta_query, 'comment', $wpdb->comments, 'comment_ID' );
+
+			$comments = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $wpdb->comments {$mq_sql['join']} WHERE comment_post_ID = %d AND ( comment_approved = '1' OR ( comment_author = %s AND comment_author_email = %s AND comment_approved = '0' ) ) {$mq_sql['where']} ORDER BY comment_date_gmt", $post->ID, wp_specialchars_decode( $comment_author, ENT_QUOTES ), $comment_author_email ) );
+		}
 
 		return $comments;
 	}
@@ -527,9 +622,6 @@ class qTC_Comment_Query extends WP_Comment_Query {
 		$clauses = apply_filters_ref_array( 'comments_clauses', array( compact( $pieces ), &$this ) );
 		foreach ( $pieces as $piece )
 			$$piece = isset( $clauses[ $piece ] ) ? $clauses[ $piece ] : '';
-
-		if ( ! empty($groupby) )
-			$groupby = 'GROUP BY ' . $groupby;
 
 		$query = "SELECT $fields FROM $wpdb->comments $join WHERE $where ORDER BY $orderby $order $limits";
 		// $wpdb->show_errors(); // Use for debugging, but genearally the query should be good :)
