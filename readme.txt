@@ -12,13 +12,13 @@ Automatically separate the user comments by the language they viewed the article
 
 == Description ==
 
-This plugin separates the user comments by the language they viewed the article in - this way you avoid duplicate content(which is frowned-upon from search engines) and comments in other languages than the one the current visitor is using(which is generally bad user experiecen). 
+This plugin separates the user comments by the language they viewed the article in - this way you avoid duplicate content(which is frowned-upon from search engines) and comments in other languages than the one the current visitor is using(which is generally bad user experience). 
 
 You can manually change the language of each comment(and you will have to set it in the begining).
 
 Bulk-editing of the comments language is also available.
 
-The plugin is using comment-meta to specify the language for each comment, so nothing will break if the comment is deactivated.
+The plugin is using comment-meta to specify the language for each comment, so nothing will break if the plugin is deactivated.
 
 It also should work out-of-the-box for all themes that use the comments_template() function to render their comments. 
 
