@@ -53,6 +53,9 @@ In order to properly identify where the comment is coming from, this plugin adds
 
 == Changelog ==
 
+= 1.1.1 =
+Fixed a bug related to proper setting of the language/redirecting back. The code was tested both from a root-level install and a sub-directory install. 
+
 = 1.1 =
 * Fixed the `fix_comments_count()` function(a typo was returning the wrong comments count) - thanks @hyOzd
 * Added support for qTranslate's "Query Mode"

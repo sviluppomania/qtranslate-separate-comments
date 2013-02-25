@@ -2,7 +2,7 @@
 /*
 Plugin Name: qTranslate Separate Comments
 Description: This plugin separates the user comments by the language they viewed the article in - this way you avoid duplicate content and comments in other languages than the one the current visitor is using. You can manually change the language of each comment(and you will have to set it in the begining).
-Version: 1.1
+Version: 1.1.1
 Author: Nikola Nikolov(TheMoonWatch)
 Author URI: http://themoonwatch.com/
 License: GPLv2 or later
@@ -311,7 +311,7 @@ class qTranslate_Separate_Comments {
 				// Fix for ?lang=xx , since qTranslate doesn't parse the URL for query arguments - instead it checks the $_GET['lang'] variable
 				$get_lang = preg_match( '~lang=[a-z]{2}~', $prev_url ) ? preg_replace( '~.*lang=([a-z]{2}).*?~', '\1', $prev_url ) : false;
 
-				$q_config['url_info'] = qtrans_extractURL($prev_url, $_SERVER["HTTP_HOST"], isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '');
+				$q_config['url_info'] = qtrans_extractURL( $prev_url, $_SERVER["HTTP_HOST"], isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '' );
 
 				$q_config['language'] = $get_lang && qtrans_isEnabled( $get_lang ) ? $get_lang : $q_config['url_info']['language'];
 
@@ -369,23 +369,18 @@ class qTranslate_Separate_Comments {
 	*
 	* @access public
 	**/
-	public static function curPageURL( $exclude_host = true ) {
-		$pageURL = '';
-		if ( ! $exclude_host ) {
-			$pageURL = 'http';
-			if ($_SERVER["HTTPS"] == "on") {
-				$pageURL .= "s";
-			}
-			$pageURL .= "://";
-			if ($_SERVER["SERVER_PORT"] != "80") {
-				$pageURL .= $_SERVER["SERVER_NAME"] . ":" . $_SERVER["SERVER_PORT"];
-			} else {
-				$pageURL .= $_SERVER["SERVER_NAME"];
-			}
+	public static function curPageURL(  ) {
+		$pageURL = 'http';
+		if ( isset( $_SERVER["HTTPS"] ) && $_SERVER["HTTPS"] == "on" ) {
+			$pageURL .= "s";
 		}
-		$pageURL .= $_SERVER["REQUEST_URI"];
-
-		return $pageURL;
+		$pageURL .= "://";
+		if ($_SERVER["SERVER_PORT"] != "80") {
+			$pageURL .= $_SERVER["SERVER_NAME"] . ":" . $_SERVER["SERVER_PORT"];
+		} else {
+			$pageURL .= $_SERVER["SERVER_NAME"];
+		}
+		return preg_replace( '~' . preg_quote( $pageURL, '~' ) . '~', '', qtrans_convertURL() );
 	}
 
 	/**
@@ -645,5 +640,3 @@ if( is_plugin_active( 'qtranslate/qtranslate.php') || ( is_multisite() && is_plu
 	global $qTranslate_Separate_Comments;
 	$qTranslate_Separate_Comments = new qTranslate_Separate_Comments();
 }
-
-?>
