@@ -2,7 +2,7 @@
 /*
 Plugin Name: qTranslate Separate Comments
 Description: This plugin separates the user comments by the language they viewed the article in - this way you avoid duplicate content and comments in other languages than the one the current visitor is using. You can manually change the language of each comment(and you will have to set it in the begining).
-Version: 1.1.1
+Version: 1.2
 Author: Nikola Nikolov(TheMoonWatch)
 Author URI: http://themoonwatch.com/
 License: GPLv2 or later
@@ -306,20 +306,9 @@ class qTranslate_Separate_Comments {
 		global $q_config;
 
 		if ( isset( $q_config ) ) {
-			$prev_url = $_POST['qtc_comment_from'];
-			if ( $prev_url ) {
-				// Fix for ?lang=xx , since qTranslate doesn't parse the URL for query arguments - instead it checks the $_GET['lang'] variable
-				$get_lang = preg_match( '~lang=[a-z]{2}~', $prev_url ) ? preg_replace( '~.*lang=([a-z]{2}).*?~', '\1', $prev_url ) : false;
-
-				$q_config['url_info'] = qtrans_extractURL( $prev_url, $_SERVER["HTTP_HOST"], isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '' );
-
-				$q_config['language'] = $get_lang && qtrans_isEnabled( $get_lang ) ? $get_lang : $q_config['url_info']['language'];
-
-				$q_config['url_info']['original_url'] = untrailingslashit( remove_query_arg( 'lang', $q_config['url_info']['original_url'] ) );
-				$q_config['url_info']['url'] = untrailingslashit( remove_query_arg( 'lang', $q_config['url_info']['url'] ) );
-			}
-			$comm_lang = $q_config['language'];
-			update_comment_meta($commentID, '_comment_language', $comm_lang);
+			$comm_lang = isset( $_POST['qtc_comment_lang'] ) && in_array( $_POST['qtc_comment_lang'], $q_config['enabled_languages'] ) ? $_POST['qtc_comment_lang'] : $q_config['default_language'];
+			$q_config['language'] = $comm_lang;
+			update_comment_meta( $commentID, '_comment_language', $comm_lang );
 
 			add_filter( 'comment_post_redirect', array( 'qTranslate_Separate_Comments', 'fix_comment_post_redirect' ), 10, 2 );
 		}
@@ -356,31 +345,8 @@ class qTranslate_Separate_Comments {
 	**/
 	public static function comment_form_hook($post_id) {
 		global $q_config;
-		$url = self::curPageURL();
-		$url = ! in_array( $q_config['url_mode'], array( QT_URL_PATH, QT_URL_DOMAIN ) ) && ! preg_match( '~lang=[a-z]{2}~', $prev_url ) ? add_query_arg( 'lang', $q_config['language'], $url ) : $url;
-		echo '<input type="hidden" name="qtc_comment_from" value="' . esc_attr( $url ) . '" />';
-	}
 
-	/**
-	* Returns the current page URL, including any query arguments
-	* Skips the http://host/ part by default
-	*
-	* @param boolean $exclude_host - Whether to exclude the "http://host/" part. Defaults to true
-	*
-	* @access public
-	**/
-	public static function curPageURL(  ) {
-		$pageURL = 'http';
-		if ( isset( $_SERVER["HTTPS"] ) && $_SERVER["HTTPS"] == "on" ) {
-			$pageURL .= "s";
-		}
-		$pageURL .= "://";
-		if ($_SERVER["SERVER_PORT"] != "80") {
-			$pageURL .= $_SERVER["SERVER_NAME"] . ":" . $_SERVER["SERVER_PORT"];
-		} else {
-			$pageURL .= $_SERVER["SERVER_NAME"];
-		}
-		return preg_replace( '~' . preg_quote( $pageURL, '~' ) . '~', '', qtrans_convertURL() );
+		echo '<input type="hidden" name="qtc_comment_lang" value="' . esc_attr( $q_config['language'] ) . '" />';
 	}
 
 	/**

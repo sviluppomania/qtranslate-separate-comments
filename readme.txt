@@ -53,6 +53,9 @@ In order to properly identify where the comment is coming from, this plugin adds
 
 == Changelog ==
 
+= 1.2 =
+Changed the passing of the comment language to a much, much more simple way, that should be more proof to errors.
+
 = 1.1.1 =
 Fixed a bug related to proper setting of the language/redirecting back. The code was tested both from a root-level install and a sub-directory install. 
 
