@@ -3,8 +3,8 @@ Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Contributors: nikolov.tmw
 Tags: qTranslate, comments, comment languages
 Requires at least: 3.3.2
-Tested up to: 3.4
-Stable tag: trunk
+Tested up to: 3.5.1
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -52,6 +52,9 @@ In order to properly identify where the comment is coming from, this plugin adds
 	1. This is the notification message when a comment's language has either not been set-up or that language is currently disabled.
 
 == Changelog ==
+
+= 1.2.1 =
+Changed the tested up to version to 3.5.1. Changed stable tag from trunk to tag number. 
 
 = 1.2 =
 Changed the passing of the comment language to a much, much more simple way, that should be more proof to errors.

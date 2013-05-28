@@ -2,7 +2,7 @@
 /*
 Plugin Name: qTranslate Separate Comments
 Description: This plugin separates the user comments by the language they viewed the article in - this way you avoid duplicate content and comments in other languages than the one the current visitor is using. You can manually change the language of each comment(and you will have to set it in the begining).
-Version: 1.2
+Version: 1.2.1
 Author: Nikola Nikolov(TheMoonWatch)
 Author URI: http://themoonwatch.com/
 License: GPLv2 or later
