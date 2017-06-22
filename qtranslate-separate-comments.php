@@ -1,16 +1,16 @@
 <?php
 /*
-Plugin Name: qTranslate Separate Comments
+Plugin Name: qTranslate(-x) Separate Comments
 Description: This plugin separates the user comments by the language they viewed the article in - this way you avoid duplicate content and comments in other languages than the one the current visitor is using. You can manually change the language of each comment(and you will have to set it in the begining).
-Version: 1.2.1
-Author: Nikola Nikolov(TheMoonWatch)
-Author URI: http://themoonwatch.com/
+Version: 1.2.3
+Author: Nikola Nikolov
+Author URI: https://paiyakdev.com/
 License: GPLv2 or later
 
 ==========================================
 Licensing information
 
-Copyright 2012 Nikola Nikolov (email : nikolov.tmw@gmail.com)
+Copyright 2017 Nikola Nikolov (email : nikolov.tmw@gmail.com)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License, version 2, as 
@@ -601,8 +601,15 @@ class qTC_Comment_Query extends WP_Comment_Query {
 
 // Required for the "is_plugin_active()" and "is_plugin_active_for_network()" functions
 include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-// Only run our plugin if qTranslate is active
-if( is_plugin_active( 'qtranslate/qtranslate.php') || ( is_multisite() && is_plugin_active_for_network( 'qtranslate/qtranslate.php') ) ) {
+// Only run our plugin if qTranslate OR qTranslate-X is active
+if (
+	(
+		is_plugin_active( 'qtranslate/qtranslate.php') ||
+		( is_multisite() && is_plugin_active_for_network( 'qtranslate/qtranslate.php') )
+	) || (
+		is_plugin_active( 'qtranslate-x/qtranslate.php') ||
+		( is_multisite() && is_plugin_active_for_network( 'qtranslate-x/qtranslate.php') )
+	) ) {
 	global $qTranslate_Separate_Comments;
 	$qTranslate_Separate_Comments = new qTranslate_Separate_Comments();
 }
