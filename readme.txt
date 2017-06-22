@@ -1,4 +1,4 @@
-=== qTranslate Separate Comments ===
+=== qTranslate(-X) Separate Comments ===
 Contributors: nikolov.tmw, paiyakdev
 Tags: qTranslate, qTranslate-X, comments, comment languages
 Requires at least: 3.3.2
