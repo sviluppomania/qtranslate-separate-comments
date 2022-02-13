@@ -48,6 +48,7 @@ class qTranslate_Separate_Comments {
 		}
 		add_filter( 'manage_edit-comments_columns', array( 'qTranslate_Separate_Comments', 'filter_edit_comments_t_headers' ), 100 );
 		add_filter( 'get_comments_number', array( 'qTranslate_Separate_Comments', 'fix_comments_count' ), 100, 2 );
+		add_filter( 'widget_comments_args', array( 'qTranslate_Separate_Comments', 'filter_recent_comments_widget_args' ), 10, 1 );
 	}
 
 	/**
@@ -131,7 +132,16 @@ class qTranslate_Separate_Comments {
 			return count($comments);
 		}
 	}
+	
+	public static function filter_recent_comments_widget_args($args)
+	{
+	  global $q_config;
+	  $args['meta_key'] = '_comment_language';
+	  $args['meta_value'] = $q_config['language'];
 
+	  return $args;
+	}
+	
 	/**
 	* Adds a "Language" header for the Edit Comments screen
 	* @access public
