@@ -1,9 +1,9 @@
 === qTranslate(-X) Separate Comments ===
-Contributors: nikolov.tmw, paiyakdev
-Tags: qTranslate, qTranslate-X, comments, comment languages
-Requires at least: 3.3.2
-Tested up to: 4.8
-Stable tag: 1.2.3
+Contributors: nikolov.tmw, paiyakdev, sviluppomania
+Tags: qTranslate, qTranslate-X, qTranslate-XT (eXTended), comments, comment languages, separate comment languages
+Requires at least: 4.8.18
+Tested up to: 5.9
+Stable tag: 1.2.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -51,6 +51,11 @@ In order to properly identify where the comment is coming from, this plugin adds
 	1. This is the notification message when a comment's language has either not been set-up or that language is currently disabled.
 
 == Changelog ==
+
+= 1.2.4 (2022-02-13) =
+Tested with WordPress 5.9 and PHP 8.1 - still works! Also added support for qTranslate-XT (eXTended), as it seems to be an active fork of qTranslate and qTranslate-X
+Added support for WordPress Recent Comments Widget
+Added meta languages for mobile applications
 
 = 1.2.3 =
 Tested with WordPress 4.8 - still works! Also added support for qTranslate-X, as it seems to be an active fork of qTranslate.
