@@ -1,26 +1,21 @@
 <?php
 /*
-Plugin Name: qTranslate(-x) Separate Comments
+Plugin Name: qTranslate(-xt) Separate Comments
 Description: This plugin separates the user comments by the language they viewed the article in - this way you avoid duplicate content and comments in other languages than the one the current visitor is using. You can manually change the language of each comment(and you will have to set it in the begining).
-Version: 1.2.3
+Version: 1.2.4
 Author: Nikola Nikolov
 Author URI: https://paiyakdev.com/
 License: GPLv2 or later
-
 ==========================================
 Licensing information
-
-Copyright 2017 Nikola Nikolov (email : nikolov.tmw@gmail.com)
-
+Copyright 2017-2022 Nikola Nikolov (email : nikolov.tmw@gmail.com)
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License, version 2, as
 published by the Free Software Foundation.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -48,6 +43,7 @@ class qTranslate_Separate_Comments {
 		}
 		add_filter( 'manage_edit-comments_columns', array( 'qTranslate_Separate_Comments', 'filter_edit_comments_t_headers' ), 100 );
 		add_filter( 'get_comments_number', array( 'qTranslate_Separate_Comments', 'fix_comments_count' ), 100, 2 );
+		add_filter( 'widget_comments_args', array( 'qTranslate_Separate_Comments', 'filter_recent_comments_widget_args' ), 10, 1 );
 	}
 
 	/**
@@ -131,7 +127,16 @@ class qTranslate_Separate_Comments {
 			return count($comments);
 		}
 	}
+	
+	public static function filter_recent_comments_widget_args($args)
+	{
+	  global $q_config;
+	  $args['meta_key'] = '_comment_language';
+	  $args['meta_value'] = $q_config['language'];
 
+	  return $args;
+	}
+	
 	/**
 	* Adds a "Language" header for the Edit Comments screen
 	* @access public
@@ -638,9 +643,11 @@ if (
 		is_plugin_active( 'qtranslate/qtranslate.php') ||
 		( is_multisite() && is_plugin_active_for_network( 'qtranslate/qtranslate.php') )
 	) || (
-		is_plugin_active( 'qtranslate-x/qtranslate.php') ||
-		( is_multisite() && is_plugin_active_for_network( 'qtranslate-x/qtranslate.php') )
+		is_plugin_active( 'qtranslate-xt/qtranslate.php') ||
+		( is_multisite() && is_plugin_active_for_network( 'qtranslate-xt/qtranslate.php') )
 	) ) {
 	global $qTranslate_Separate_Comments;
 	$qTranslate_Separate_Comments = new qTranslate_Separate_Comments();
 }
+
+?>
